@@ -1,3 +1,21 @@
-//Nodo 1
+//Nodo 1: Buscar Ultimo estado
+var rfid = msg.payload;//Recuperar dato de MQTT
+msg.id = rfid;//Pasarlo como variable
 
-//Nodo 2
+//Seleccion de estado
+msg.topic = "SELECT estado, rfid from accesos  WHERE rfid =  '"+rfid+"' ORDER BY fecha  DESC LIMIT 1;";
+return msg;
+
+//Nodo 2:Asignar Estado
+var objeto = msg.payload;//Recuperar estado y UID
+var id = msg.id//Recupera UID del MQTT
+if(objeto[0].estado == "Entrada"){//Caso 1, ya marca como entrada
+    msg.topic = "INSERT INTO `Monitoreo Facial`.accesos(rfid, estado, fecha) VALUES('"+objeto[0].rfid+"', 'Salida', CURRENT_TIMESTAMP);";
+    return msg;
+}else if(objeto[0].estado == "Salida"){//Caso 2, ya marca como salida
+    msg.topic = "INSERT INTO `Monitoreo Facial`.accesos(rfid, estado, fecha) VALUES('"+objeto[0].rfid+"', 'Entrada', CURRENT_TIMESTAMP);";
+    return msg;
+}else if(objeto[0].estado == ""){//Caso 3, no existe en la base de datos.
+    msg.topic = "INSERT INTO `Monitoreo Facial`.accesos(rfid, estado, fecha) VALUES('"+id+"', 'Entrada', CURRENT_TIMESTAMP);";
+    return msg;
+}
